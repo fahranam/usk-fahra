@@ -7,7 +7,11 @@ use Illuminate\Http\Request;
 
 class SkemaController extends Controller
 {
-    // Menampilkan daftar seluruh skema sertifikasi
+    /**
+     * Nama Fungsi: index
+     * Tujuan: Menampilkan daftar seluruh master skema sertifikasi beserta jumlah asesi dan jumlah tugas terkait.
+     * Alur: Memanggil model Skema dengan eager loading count pesertas & tugas, lalu merender tampilan skemas/index.
+     */
     public function index()
     {
         $skemas = Skema::withCount(['pesertas', 'tugas'])->latest()->get();
@@ -15,13 +19,21 @@ class SkemaController extends Controller
         return view('skemas.index', compact('skemas'));
     }
 
-    // Menampilkan formulir penambahan skema baru oleh Admin
+    /**
+     * Nama Fungsi: create
+     * Tujuan: Menampilkan halaman formulir pembuatan skema sertifikasi baru bagi Administrator.
+     * Alur: Merender tampilan skemas/create.
+     */
     public function create()
     {
         return view('skemas.create');
     }
 
-    // Menyimpan data skema sertifikasi baru ke database
+    /**
+     * Nama Fungsi: store
+     * Tujuan: Memvalidasi dan menyimpan data skema sertifikasi baru ke dalam database tabel skemas.
+     * Alur: Memvalidasi keunikan kode_skema dan nama_skema, membuat record baru, lalu redirect ke halaman index dengan pesan sukses.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -41,13 +53,21 @@ class SkemaController extends Controller
             ->with('success', 'Skema sertifikasi berhasil ditambahkan.');
     }
 
-    // Menampilkan formulir edit skema sertifikasi
+    /**
+     * Nama Fungsi: edit
+     * Tujuan: Menampilkan formulir untuk mengedit data skema sertifikasi yang dipilih.
+     * Alur: Menerima objek Skema via route model binding, lalu merender tampilan skemas/edit.
+     */
     public function edit(Skema $skema)
     {
         return view('skemas.edit', compact('skema'));
     }
 
-    // Memproses dan menyimpan pembaruan data skema
+    /**
+     * Nama Fungsi: update
+     * Tujuan: Memperbarui data skema sertifikasi yang ada di database berdasarkan input yang telah divalidasi.
+     * Alur: Memvalidasi input (mengabaikan kode_skema milik skema saat ini), menjalankan method update, dan redirect kembali ke index.
+     */
     public function update(Request $request, Skema $skema)
     {
         $validated = $request->validate([
@@ -67,7 +87,11 @@ class SkemaController extends Controller
             ->with('success', 'Skema sertifikasi berhasil diperbarui.');
     }
 
-    // Menghapus data skema sertifikasi dari database
+    /**
+     * Nama Fungsi: destroy
+     * Tujuan: Menghapus data skema sertifikasi dari database beserta relasi terkaitnya (cascade delete).
+     * Alur: Menerima objek Skema, memanggil delete(), lalu mengembalikan ke daftar skema dengan pesan konfirmasi.
+     */
     public function destroy(Skema $skema)
     {
         $namaSkema = $skema->nama_skema;
@@ -78,7 +102,11 @@ class SkemaController extends Controller
             ->with('success', "Skema '{$namaSkema}' berhasil dihapus.");
     }
 
-    // Menampilkan detail lengkap suatu skema sertifikasi
+    /**
+     * Nama Fungsi: show
+     * Tujuan: Menampilkan informasi detail skema sertifikasi serta daftar tugas uji yang ada pada skema tersebut.
+     * Alur: Memuat relasi pesertas dan tugas dari model Skema, lalu merender tampilan skemas/show.
+     */
     public function show(Skema $skema)
     {
         $skema->load(['pesertas', 'tugas']);

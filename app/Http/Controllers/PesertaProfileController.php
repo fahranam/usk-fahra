@@ -11,7 +11,11 @@ use Illuminate\Support\Facades\Hash;
 
 class PesertaProfileController extends Controller
 {
-    // Menampilkan dashboard peserta
+    /**
+     * Nama Fungsi: dashboard
+     * Tujuan: Menampilkan halaman utama (dashboard) khusus bagi asesi/peserta yang sedang login.
+     * Alur: Memastikan role adalah peserta, mengecek ketersediaan profil peserta (jika belum ada dialihkan untuk melengkapi profil), mengambil data skema, dan merender tampilan pesertas/dashboard.
+     */
     public function dashboard()
     {
         $user = Auth::user();
@@ -31,7 +35,11 @@ class PesertaProfileController extends Controller
         return view('pesertas.dashboard', compact('peserta', 'skemas'));
     }
 
-    // Mengganti / memilih skema sertifikasi baru dari dashboard peserta
+    /**
+     * Nama Fungsi: pilihSkemaBaru
+     * Tujuan: Mengubah pilihan skema sertifikasi aktif yang diikuti oleh peserta dari dashboard.
+     * Alur: Memvalidasi skema_id baru, memperbarui foreign key skema_id pada record peserta, mengatur ulang status kelulusan menjadi 'Belum Mengumpulkan', lalu me-redirect dengan pesan konfirmasi.
+     */
     public function pilihSkemaBaru(Request $request)
     {
         $user = Auth::user();
@@ -65,7 +73,11 @@ class PesertaProfileController extends Controller
             ->with('success', 'Skema sertifikasi yang dipilih saat ini sudah aktif.');
     }
 
-    // Menampilkan formulir pelengkapan profil jika belum ada
+    /**
+     * Nama Fungsi: create
+     * Tujuan: Menampilkan formulir pengisian data diri awal bagi asesi yang baru mendaftar dan belum memiliki profil peserta.
+     * Alur: Memeriksa apakah user sudah memiliki relasi peserta (jika sudah diarahkan ke dashboard), jika belum merender tampilan pesertas/profil.
+     */
     public function create()
     {
         $user = Auth::user();
@@ -83,7 +95,11 @@ class PesertaProfileController extends Controller
         return view('pesertas.profil', compact('user', 'skemas'));
     }
 
-    // Menyimpan profil peserta (pertama kali setelah register)
+    /**
+     * Nama Fungsi: store
+     * Tujuan: Menyimpan data profil peserta pertama kali setelah akun dibuat.
+     * Alur: Memvalidasi NIK, alamat, jenis kelamin, dan skema_id, membuat record baru di tabel pesertas dengan foreign key user_id, lalu redirect ke dashboard.
+     */
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -129,7 +145,11 @@ class PesertaProfileController extends Controller
             ->with('success', 'Profil peserta berhasil dilengkapi! Selamat datang di LSP-APP.');
     }
 
-    // Menampilkan form edit profil & ganti password untuk Admin maupun Peserta
+    /**
+     * Nama Fungsi: edit
+     * Tujuan: Menampilkan halaman formulir pengaturan biodata profil dan ganti kata sandi akun (dapat diakses baik oleh Administrator maupun Peserta).
+     * Alur: Mengambil data pengguna login, memuat data peserta & referensi skema jika role peserta, lalu merender tampilan pesertas/edit-profile.
+     */
     public function edit()
     {
         $user = Auth::user();
@@ -149,7 +169,11 @@ class PesertaProfileController extends Controller
         return view('pesertas.edit-profile', compact('user', 'peserta', 'skemas'));
     }
 
-    // Menyimpan perubahan data profil
+    /**
+     * Nama Fungsi: update
+     * Tujuan: Menyimpan pembaruan biodata profil pengguna (admin maupun peserta) ke database.
+     * Alur: Membedakan alur update berdasarkan role (admin mengupdate tabel users, peserta mengupdate tabel pesertas dan tabel users), lalu redirect kembali dengan notifikasi sukses.
+     */
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -219,7 +243,11 @@ class PesertaProfileController extends Controller
         return back()->with('success', 'Biodata profil berhasil diperbarui.');
     }
 
-    // Memproses penggantian password akun (berlaku untuk Admin & Peserta)
+    /**
+     * Nama Fungsi: updatePassword
+     * Tujuan: Memproses penggantian kata sandi (password) akun pengguna yang sedang login.
+     * Alur: Memvalidasi password baru minimal 6 karakter dan konfirmasi kecocokan, mengenkripsi password dengan Hash::make, lalu memperbarui record di tabel users.
+     */
     public function updatePassword(Request $request)
     {
         $user = Auth::user();

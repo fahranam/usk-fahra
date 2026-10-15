@@ -8,7 +8,11 @@ use Illuminate\Http\Request;
 
 class PesertaController extends Controller
 {
-    // Menampilkan daftar seluruh peserta sertifikasi dengan fitur pencarian dan filter skema
+    /**
+     * Nama Fungsi: index
+     * Tujuan: Menampilkan daftar seluruh peserta asesmen dengan fitur pencarian dan penyaringan data.
+     * Alur: Memeriksa parameter pencarian (nama, NIK, email, no_hp) dan filter skema_id/status, menjalankan query Eloquent ke tabel pesertas dengan relasi skema, lalu merender tampilan pesertas/index.
+     */
     public function index(Request $request)
     {
         $query = Peserta::with('skema');
@@ -38,7 +42,11 @@ class PesertaController extends Controller
         return view('pesertas.index', compact('pesertas', 'skemas'));
     }
 
-    // Menampilkan halaman formulir tambah peserta baru oleh Admin
+    /**
+     * Nama Fungsi: create
+     * Tujuan: Menampilkan formulir pendaftaran peserta asesmen baru oleh Administrator.
+     * Alur: Mengambil daftar skema sertifikasi untuk pilihan dropdown, lalu merender tampilan pesertas/create.
+     */
     public function create()
     {
         $skemas = Skema::all();
@@ -46,7 +54,11 @@ class PesertaController extends Controller
         return view('pesertas.create', compact('skemas'));
     }
 
-    // Menyimpan data peserta baru ke database dengan validasi
+    /**
+     * Nama Fungsi: store
+     * Tujuan: Memvalidasi dan menyimpan data peserta sertifikasi baru yang didaftarkan langsung oleh Administrator.
+     * Alur: Memvalidasi format NIK 16 digit, format nama tanpa angka, nomor HP, email, dan skema_id, menetapkan status awal 'Belum Mengumpulkan', lalu menyimpannya ke tabel pesertas.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -84,7 +96,11 @@ class PesertaController extends Controller
             ->with('success', 'Data peserta sertifikasi berhasil ditambahkan.');
     }
 
-    // Menampilkan detail lengkap satu peserta sertifikasi
+    /**
+     * Nama Fungsi: show
+     * Tujuan: Menampilkan rincian profil biodata lengkap dan rekam jejak tugas unjuk kerja peserta.
+     * Alur: Memuat relasi skema dan riwayat pengumpulanTugas peserta, lalu merender tampilan pesertas/show.
+     */
     public function show(Peserta $peserta)
     {
         $peserta->load(['skema', 'pengumpulanTugas.tugas']);
@@ -92,7 +108,11 @@ class PesertaController extends Controller
         return view('pesertas.show', compact('peserta'));
     }
 
-    // Menampilkan formulir edit data peserta
+    /**
+     * Nama Fungsi: edit
+     * Tujuan: Menampilkan formulir perubahan data peserta sertifikasi yang dipilih oleh Administrator.
+     * Alur: Mengambil data referensi skema sertifikasi dan data peserta, lalu merender tampilan pesertas/edit.
+     */
     public function edit(Peserta $peserta)
     {
         $skemas = Skema::all();
@@ -100,7 +120,11 @@ class PesertaController extends Controller
         return view('pesertas.edit', compact('peserta', 'skemas'));
     }
 
-    // Memproses dan menyimpan pembaruan data peserta
+    /**
+     * Nama Fungsi: update
+     * Tujuan: Memperbarui data biodata peserta di database sekaligus menyinkronkan data akun User yang terhubung jika ada.
+     * Alur: Memvalidasi input data dengan mengabaikan NIK peserta saat ini, menyimpan perubahan ke tabel pesertas, dan mengupdate nama/no_hp di tabel users jika memiliki akun login.
+     */
     public function update(Request $request, Peserta $peserta)
     {
         $validated = $request->validate([
@@ -129,7 +153,6 @@ class PesertaController extends Controller
 
         $peserta->update($validated);
 
-        // Jika peserta punya akun user terkait, sinkronkan juga
         if ($peserta->user_id) {
             \App\Models\User::where('id', $peserta->user_id)->update([
                 'name' => $validated['nama'],
@@ -142,7 +165,11 @@ class PesertaController extends Controller
             ->with('success', 'Data peserta berhasil diperbarui.');
     }
 
-    // Menghapus data peserta dari database
+    /**
+     * Nama Fungsi: destroy
+     * Tujuan: Menghapus catatan data peserta dari database.
+     * Alur: Memanggil method delete() pada model Peserta dan redirect kembali ke pesertas/index dengan flash message.
+     */
     public function destroy(Peserta $peserta)
     {
         $nama = $peserta->nama;

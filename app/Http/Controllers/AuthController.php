@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Menampilkan halaman login
+    /**
+     * Nama Fungsi: showLogin
+     * Tujuan: Menampilkan formulir login aplikasi bagi pengguna yang belum terautentikasi.
+     * Alur: Memeriksa sesi pengguna, jika sudah login langsung diarahkan ke dashboard, jika belum menampilkan tampilan auth/login.
+     */
     public function showLogin()
     {
         if (Auth::check()) {
@@ -22,7 +26,11 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    // Menampilkan halaman pendaftaran
+    /**
+     * Nama Fungsi: showRegister
+     * Tujuan: Menampilkan formulir pendaftaran asesi baru beserta daftar pilihan skema sertifikasi yang tersedia.
+     * Alur: Mengambil seluruh data skema dari database, lalu menyajikannya ke formulir registrasi auth/register.
+     */
     public function showRegister()
     {
         if (Auth::check()) {
@@ -34,7 +42,11 @@ class AuthController extends Controller
         return view('auth.register', compact('skemas'));
     }
 
-    // Memproses login
+    /**
+     * Nama Fungsi: login
+     * Tujuan: Memverifikasi kredensial (email & password) dan membuat sesi autentikasi pengguna.
+     * Alur: Validasi input email dan password, lakukan pencocokan hash password, regenerasi ID sesi, dan arahkan ke dashboard.
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -58,7 +70,11 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Memproses pendaftaran akun & pembuatan data peserta langsung
+    /**
+     * Nama Fungsi: register
+     * Tujuan: Mendaftarkan akun pengguna baru sekaligus menyimpan data diri awal peserta ke tabel pesertas dalam satu transaksi database.
+     * Alur: Memvalidasi seluruh data input KTP/identitas dan akun, membungkus proses create user dan peserta dalam DB::transaction agar data tidak parsial bila gagal, lalu redirect ke login.
+     */
     public function register(Request $request)
     {
         $validatedData = $request->validate([
@@ -131,7 +147,11 @@ class AuthController extends Controller
             ->with('success', 'Akun pendaftaran berhasil dibuat! Silakan masuk dengan email dan password Anda.');
     }
 
-    // Memproses logout
+    /**
+     * Nama Fungsi: logout
+     * Tujuan: Mengakhiri sesi login pengguna dan menghapus token autentikasi aktif.
+     * Alur: Memanggil Auth::logout, membatalkan sesi request (invalidate), memperbarui token CSRF (regenerateToken), dan mengembalikan pengguna ke halaman selamat datang.
+     */
     public function logout(Request $request)
     {
         Auth::logout();

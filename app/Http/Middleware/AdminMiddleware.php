@@ -10,7 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 class AdminMiddleware
 {
     /**
-     * Handle an incoming request.
+     * Nama Fungsi: handle
+     * Tujuan: Membatasi hak akses rute hanya untuk pengguna yang memiliki hak/peran sebagai Administrator.
+     * Alur: Memeriksa apakah pengguna sudah login (jika belum dialihkan ke login), memastikan akun admin memiliki role 'admin', dan menolak akses (HTTP 403 Forbidden) jika pengguna bukan Administrator.
      */
     public function handle(Request $request, Closure $next): Response
     {

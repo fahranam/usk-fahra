@@ -12,11 +12,19 @@ class Skema extends Model
         'deskripsi',
     ];
 
+    /**
+     * Nama Fungsi: pesertas
+     * Tujuan: Mendefinisikan relasi One-to-Many ke model Peserta (satu skema memiliki banyak asesi/peserta terdaftar).
+     */
     public function pesertas()
     {
         return $this->hasMany(Peserta::class);
     }
 
+    /**
+     * Nama Fungsi: tugas
+     * Tujuan: Mendefinisikan relasi One-to-Many ke model Tugas (satu skema memiliki banyak penugasan uji kompetensi).
+     */
     public function tugas()
     {
         return $this->hasMany(Tugas::class);

@@ -24,11 +24,19 @@ class User extends Authenticatable
         'role',
     ];
 
+    /**
+     * Nama Fungsi: peserta
+     * Tujuan: Mendefinisikan relasi One-to-One antara akun User dengan profil data Peserta sertifikasi.
+     */
     public function peserta()
     {
         return $this->hasOne(Peserta::class);
     }
 
+    /**
+     * Nama Fungsi: casts
+     * Tujuan: Menentukan aturan casting tipe data otomatis untuk atribut model (tanggal verifikasi email dan enkripsi hash password).
+     */
     protected function casts(): array
     {
         return [

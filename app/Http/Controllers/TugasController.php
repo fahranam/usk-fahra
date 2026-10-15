@@ -12,10 +12,14 @@ use Illuminate\Support\Facades\Auth;
 class TugasController extends Controller
 {
     /* ========================================================
-       AREA ADMIN: Kelola Tugas Per Skema & Penilaian
+       AREA ADMINISTRATOR: Kelola Tugas Per Skema & Penilaian
        ======================================================== */
 
-    // Menampilkan daftar tugas yang dikelompokkan per skema sertifikasi
+    /**
+     * Nama Fungsi: indexAdmin
+     * Tujuan: Menampilkan daftar seluruh tugas uji kompetensi yang dikelompokkan berdasarkan masing-masing skema sertifikasi.
+     * Alur: Memuat data skema beserta relasi tugas, pengumpulan, dan asesi terdaftar, lalu merender tampilan tugas/admin-index.
+     */
     public function indexAdmin()
     {
         $skemas = Skema::with(['tugas.pengumpulan', 'pesertas'])->get();
@@ -23,7 +27,11 @@ class TugasController extends Controller
         return view('tugas.admin-index', compact('skemas'));
     }
 
-    // Formulir pembuatan tugas untuk suatu skema
+    /**
+     * Nama Fungsi: createAdmin
+     * Tujuan: Menampilkan formulir pembuatan tugas uji kompetensi baru untuk skema tertentu.
+     * Alur: Mengambil daftar semua skema sertifikasi dan parameter query skema_id opsional, lalu merender tampilan tugas/create.
+     */
     public function createAdmin(Request $request)
     {
         $skemas = Skema::all();
@@ -32,7 +40,11 @@ class TugasController extends Controller
         return view('tugas.create', compact('skemas', 'selectedSkemaId'));
     }
 
-    // Menyimpan tugas baru per skema
+    /**
+     * Nama Fungsi: storeAdmin
+     * Tujuan: Menyimpan tugas unjuk kerja baru ke database tabel tugas yang otomatis berlaku bagi seluruh asesi di skema tersebut.
+     * Alur: Memvalidasi skema_id, judul tugas, dan deskripsi instruksi tugas, lalu membuat record baru pada model Tugas.
+     */
     public function storeAdmin(Request $request)
     {
         $validated = $request->validate([
@@ -52,7 +64,11 @@ class TugasController extends Controller
             ->with('success', 'Tugas berhasil dibuat dan otomatis diterbitkan untuk semua peserta pada skema tersebut.');
     }
 
-    // Formulir edit tugas skema
+    /**
+     * Nama Fungsi: editAdmin
+     * Tujuan: Menampilkan formulir pengubahan data dan petunjuk tugas skema yang sudah ada.
+     * Alur: Menerima objek model Tugas via route binding dan memuat daftar skema, lalu merender tampilan tugas/edit.
+     */
     public function editAdmin(Tugas $tugas)
     {
         $skemas = Skema::all();
@@ -60,7 +76,11 @@ class TugasController extends Controller
         return view('tugas.edit', compact('tugas', 'skemas'));
     }
 
-    // Update tugas skema
+    /**
+     * Nama Fungsi: updateAdmin
+     * Tujuan: Memperbarui judul, petunjuk, atau penugasan skema pada tugas yang ada di database.
+     * Alur: Memvalidasi data input baru, menjalankan update pada model Tugas, dan redirect ke daftar tugas admin.
+     */
     public function updateAdmin(Request $request, Tugas $tugas)
     {
         $validated = $request->validate([
@@ -80,10 +100,13 @@ class TugasController extends Controller
             ->with('success', 'Tugas skema berhasil diperbarui.');
     }
 
-    // Hapus tugas skema
+    /**
+     * Nama Fungsi: destroyAdmin
+     * Tujuan: Menghapus data tugas dari database sekaligus membersihkan berkas file bukti gambar yang pernah diunggah oleh asesi.
+     * Alur: Mengiterasi pengumpulan tugas terkait untuk menghapus file fisik di storage/public dengan unlink, lalu menghapus record Tugas.
+     */
     public function destroyAdmin(Tugas $tugas)
     {
-        // Hapus file lampiran jika ada
         foreach ($tugas->pengumpulan as $p) {
             if ($p->file_jawaban && file_exists(public_path($p->file_jawaban))) {
                 @unlink(public_path($p->file_jawaban));
@@ -97,7 +120,11 @@ class TugasController extends Controller
             ->with('success', 'Tugas skema berhasil dihapus.');
     }
 
-    // Halaman daftar pengumpulan peserta untuk suatu tugas skema
+    /**
+     * Nama Fungsi: penilaianAdmin
+     * Tujuan: Menampilkan daftar seluruh asesi pada suatu skema beserta status pengumpulan jawaban pada tugas yang dipilih.
+     * Alur: Mengambil data asesi yang terdaftar di skema tugas tersebut beserta relasi pengumpulanTugas-nya, lalu merender tampilan tugas/admin-penilaian.
+     */
     public function penilaianAdmin(Tugas $tugas)
     {
         $tugas->load('skema');
@@ -110,7 +137,11 @@ class TugasController extends Controller
         return view('tugas.admin-penilaian', compact('tugas', 'pesertas'));
     }
 
-    // Halaman review dan form penilaian untuk satu peserta tertentu
+    /**
+     * Nama Fungsi: reviewPesertaAdmin
+     * Tujuan: Menampilkan lembar kerja pemeriksaan bukti jawaban (link/gambar) satu orang asesi tertentu beserta form keputusan penilaian asesor.
+     * Alur: Mengambil record pengumpulan_tugas berdasarkan tugas_id dan peserta_id, lalu merender tampilan tugas/admin-review-peserta.
+     */
     public function reviewPesertaAdmin(Tugas $tugas, Peserta $peserta)
     {
         $tugas->load('skema');
@@ -121,7 +152,11 @@ class TugasController extends Controller
         return view('tugas.admin-review-peserta', compact('tugas', 'peserta', 'pengumpulan'));
     }
 
-    // Simpan persetujuan / keputusan kompeten dari Admin
+    /**
+     * Nama Fungsi: simpanNilaiAdmin
+     * Tujuan: Menyimpan keputusan penilaian asesor ('Kompeten' atau 'Belum Kompeten') dan catatan feedback, lalu memperbarui status kelulusan akhir asesi.
+     * Alur: Memperbarui record pengumpulan_tugas via updateOrCreate, memanggil method $peserta->sinkronkanStatusKompetensi() untuk evaluasi bertahap, lalu redirect kembali ke daftar penilaian.
+     */
     public function simpanNilaiAdmin(Request $request, Tugas $tugas, Peserta $peserta)
     {
         $validated = $request->validate([
@@ -157,10 +192,14 @@ class TugasController extends Controller
 
 
     /* ========================================================
-       AREA PESERTA: Melihat & Mengumpulkan Tugas Skema
+       AREA ASESI / PESERTA: Melihat & Mengumpulkan Bukti Tugas
        ======================================================== */
 
-    // Halaman tugas peserta berdasarkan skema yang diambil
+    /**
+     * Nama Fungsi: indexPeserta
+     * Tujuan: Menampilkan daftar seluruh tugas unjuk kerja yang wajib dikerjakan oleh asesi sesuai skema sertifikasi yang sedang aktif.
+     * Alur: Mengidentifikasi asesi yang sedang login, memuat seluruh tugas pada skema_id asesi beserta pengumpulan miliknya, lalu merender tampilan pesertas/tugas.
+     */
     public function indexPeserta()
     {
         $user = Auth::user();
@@ -180,7 +219,11 @@ class TugasController extends Controller
         return view('pesertas.tugas', compact('peserta', 'daftarTugas'));
     }
 
-    // Pengumpulan jawaban tugas (Link dan/atau Gambar) oleh peserta
+    /**
+     * Nama Fungsi: submitPeserta
+     * Tujuan: Menerima, memvalidasi, mengunggah berkas portofolio (gambar/screenshot) dan tautan URL pengerjaan tugas dari asesi.
+     * Alur: Memastikan tugas cocok dengan skema asesi, memvalidasi URL dan file gambar (maks 3MB), menyimpan file ke public/uploads/tugas, menyimpan ke tabel pengumpulan_tugas dengan status 'Menunggu Penilaian', dan menyinkronkan status kelulusan asesi.
+     */
     public function submitPeserta(Request $request, Tugas $tugas)
     {
         $user = Auth::user();

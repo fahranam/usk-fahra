@@ -12,13 +12,14 @@ class DatabaseSeeder extends Seeder
     use WithoutModelEvents;
 
     /**
-     * Seed the application's database.
+     * Nama Fungsi: run
+     * Tujuan: Menjalankan seluruh proses seeding data awal (data master skema sertifikasi dan akun administrator default) ke dalam database aplikasi.
      */
     public function run(): void
     {
         $this->call(AdminSeeder::class);
 
-        // Skema sertifikasi awal LSP
+        // Data master awal skema sertifikasi kompetensi LSP
         $skemas = [
             [
                 'kode_skema' => 'JWD-001',
